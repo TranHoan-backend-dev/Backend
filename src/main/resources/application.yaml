@@ -1,0 +1,63 @@
+spring:
+  application:
+    name: common
+  messages:
+    basename: messages
+    encoding: UTF-8
+    fallback-to-system-locale: false
+    use-code-as-default-message: true
+  profiles:
+    active: dev
+  jackson:
+    time-zone: Asia/Ho_Chi_Minh
+    locale: vi_VN
+  jpa:
+    # hibernate:
+    # ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
+        format_sql: true
+  datasource:
+    url: jdbc:mysql://localhost:3306/base
+    username: root
+    password: hoan2709
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  web:
+    locale-resolver: accept_header
+    locale: en_US
+management:
+  endpoints:
+    web:
+      exposure:
+        include:
+          - health
+          - info
+          - metrics
+          - prometheus
+      base-path: /actuator
+server:
+  port: 8080
+  servlet:
+    context-path: ${SERVER_SERVLET_CONTEXT_PATH:/api/v1}
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true
+      force-request: true
+      force-response: true
+web-frontend-url: ${WEB_FRONTEND_URL}
+cors:
+  allowed-origins:
+    - ${web-frontend-url}
+security:
+  public-urls:
+    - /api/v1/public/**
+springdoc:
+  api-docs:
+    enabled: true
+    path: ${SPRINGDOC_API_DOCS_PATH:/v3/api-docs}
+  swagger-ui:
+    enabled: true
+    path: ${SPRINGDOC_SWAGGER_UI_PATH:/swagger-ui/index.html}

@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Export Excel — Test UI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0d1117;
+      --surface: #161b22;
+      --surface2: #21262d;
+      --border: #30363d;
+      --green: #2ea043;
+      --green-hover: #3fb950;
+      --green-dim: rgba(46,160,67,0.15);
+      --text: #e6edf3;
+      --text-muted: #8b949e;
+      --red: #f85149;
+      --yellow: #e3b341;
+      --blue: #58a6ff;
+      --radius: 10px;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 40px 16px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 860px;
+    }
+
+    /* Header */
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 28px;
+    }
+    .header-icon {
+      width: 44px; height: 44px;
+      background: linear-gradient(135deg, #1d6f42, #2ea043);
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px;
+      box-shadow: 0 0 20px rgba(46,160,67,0.3);
+    }
+    .header h1 { font-size: 22px; font-weight: 700; }
+    .header p  { font-size: 13px; color: var(--text-muted); margin-top: 2px; }
+    .badge {
+      margin-left: auto;
+      background: var(--green-dim);
+      color: var(--green-hover);
+      border: 1px solid rgba(46,160,67,0.3);
+      border-radius: 20px;
+      padding: 4px 12px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    /* Card */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+
+    /* Config row */
+    .config-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .config-field {
+      padding: 16px 20px;
+    }
+    .config-field:first-child {
+      border-right: 1px solid var(--border);
+    }
+    .config-field label {
+      display: block;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+    .config-field input, .config-field select {
+      width: 100%;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      padding: 8px 12px;
+      outline: none;
+      transition: border-color .2s;
+    }
+    .config-field input:focus, .config-field select:focus {
+      border-color: var(--green);
+      box-shadow: 0 0 0 3px rgba(46,160,67,0.15);
+    }
+
+    /* Tabs */
+    .tabs {
+      display: flex;
+      border-bottom: 1px solid var(--border);
+      padding: 0 12px;
+      gap: 2px;
+    }
+    .tab-btn {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      font-weight: 500;
+      padding: 12px 14px;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px;
+      transition: color .2s, border-color .2s;
+    }
+    .tab-btn:hover { color: var(--text); }
+    .tab-btn.active { color: var(--green-hover); border-bottom-color: var(--green); }
+
+    /* Payload area */
+    .payload-wrapper {
+      position: relative;
+    }
+    .payload-label {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 20px 0;
+    }
+    .payload-label span {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-muted);
+    }
+    .btn-format {
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      color: var(--text-muted);
+      font-family: 'Inter', sans-serif;
+      font-size: 11px;
+      padding: 3px 10px;
+      cursor: pointer;
+      transition: all .2s;
+    }
+    .btn-format:hover { border-color: var(--blue); color: var(--blue); }
+
+    #payload {
+      width: 100%;
+      height: 320px;
+      background: var(--surface2);
+      border: none;
+      border-top: 1px solid var(--border);
+      color: #a8d8a8;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12.5px;
+      line-height: 1.6;
+      padding: 16px 20px;
+      resize: vertical;
+      outline: none;
+      margin-top: 10px;
+    }
+    #payload:focus { background: #1c2128; }
+
+    /* Action row */
+    .action-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 16px 20px;
+      border-top: 1px solid var(--border);
+    }
+    .btn-download {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--green);
+      color: #fff;
+      border: none;
+      border-radius: 7px;
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      padding: 10px 22px;
+      cursor: pointer;
+      transition: background .2s, transform .1s, box-shadow .2s;
+    }
+    .btn-download:hover {
+      background: var(--green-hover);
+      box-shadow: 0 0 16px rgba(46,160,67,0.4);
+    }
+    .btn-download:active { transform: scale(0.97); }
+    .btn-download:disabled {
+      background: var(--surface2);
+      color: var(--text-muted);
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+    .btn-download svg { width: 16px; height: 16px; }
+
+    /* Status */
+    .status-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-left: auto;
+    }
+    .status-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--text-muted);
+      transition: background .3s;
+    }
+    .status-dot.loading { background: var(--yellow); animation: pulse 1s infinite; }
+    .status-dot.success { background: var(--green); }
+    .status-dot.error   { background: var(--red); }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
+    #status-text {
+      font-size: 13px;
+      color: var(--text-muted);
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* Spinner inside button */
+    .spinner {
+      width: 14px; height: 14px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin .7s linear infinite;
+      display: none;
+    }
+    @keyframes spin { to{transform:rotate(360deg)} }
+
+    /* Toast */
+    #toast {
+      position: fixed;
+      bottom: 28px;
+      right: 28px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      padding: 12px 18px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 13px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+      transform: translateY(80px);
+      opacity: 0;
+      transition: transform .3s ease, opacity .3s ease;
+      z-index: 999;
+      max-width: 320px;
+    }
+    #toast.show { transform: translateY(0); opacity: 1; }
+    #toast .toast-icon { font-size: 18px; }
+
+    /* Error box */
+    #error-box {
+      margin: 0 20px 16px;
+      background: rgba(248,81,73,0.1);
+      border: 1px solid rgba(248,81,73,0.3);
+      border-radius: 7px;
+      padding: 10px 14px;
+      font-size: 12.5px;
+      color: var(--red);
+      font-family: 'JetBrains Mono', monospace;
+      display: none;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="header-icon">📊</div>
+    <div>
+      <h1>Export Excel — Test UI</h1>
+      <p>Gửi request và tải về file Excel từ API</p>
+    </div>
+    <span class="badge">POST /export/excel</span>
+  </div>
+
+  <!-- Card -->
+  <div class="card">
+
+    <!-- Config: Base URL + File name -->
+    <div class="config-row">
+      <div class="config-field">
+        <label>Base URL</label>
+        <input id="baseUrl" type="text" value="http://localhost:8080" placeholder="http://localhost:8080" />
+      </div>
+      <div class="config-field">
+        <label>Tên file xuất (.xlsx tự thêm)</label>
+        <input id="fileName" type="text" value="bao_cao_nhan_su" placeholder="ten_file" />
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="single"       onclick="switchTab('single')">Single Sheet</button>
+      <button class="tab-btn"        data-tab="multiContent" onclick="switchTab('multiContent')">Multi Content</button>
+      <button class="tab-btn"        data-tab="multi"        onclick="switchTab('multi')">Multi Sheet</button>
+      <button class="tab-btn"        data-tab="custom"       onclick="switchTab('custom')">Custom JSON</button>
+    </div>
+
+    <!-- Payload -->
+    <div class="payload-wrapper">
+      <div class="payload-label">
+        <span>Request Body (JSON)</span>
+        <button class="btn-format" onclick="formatJson()">⌥ Format</button>
+      </div>
+      <textarea id="payload" spellcheck="false"></textarea>
+    </div>
+
+    <!-- Error box -->
+    <div id="error-box"></div>
+
+    <!-- Action row -->
+    <div class="action-row">
+      <button class="btn-download" id="downloadBtn" onclick="downloadExcel()">
+        <span class="spinner" id="spinner"></span>
+        <svg id="dl-icon" viewBox="0 0 16 16" fill="currentColor">
+          <path d="M8 10.5L4.5 7H7V1h2v6h2.5L8 10.5z"/>
+          <path d="M2 13h12v1.5H2V13z"/>
+        </svg>
+        Tải xuống Excel
+      </button>
+      <div class="status-wrap">
+        <div class="status-dot" id="status-dot"></div>
+        <span id="status-text">Sẵn sàng</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="toast">
+  <span class="toast-icon" id="toast-icon">✅</span>
+  <span id="toast-msg">Tải file thành công!</span>
+</div>
+
+<script>
+  // ── Preset payloads ──────────────────────────────────────────────
+  const PRESETS = {
+    single: {
+      isMultipleSheet: false,
+      data: [{
+        title: "Danh sach nhan vien",
+        contents: [{
+          subTitle: "Bao cao nhan su thang 10/2026",
+          headerCells: ["Ho va ten","Chuc vu","Ngay sinh","Ngay vao lam","So ngay cong","Luong co ban","Phu cap","Tong thu nhap"],
+          tableRows: [
+            ["Nguyen Van An",  "Lap trinh vien",    "1995-03-15","2020-06-01",26,15000000,500000.0,15500000],
+            ["Tran Thi Bich",  "Kiem thu phan mem", "1998-07-22","2022-01-10",24,12000000,300000.0,12300000],
+            ["Le Minh Duc",    "Quan ly du an",     "1990-11-05","2018-03-20",26,25000000,1000000.0,26000000],
+            ["Pham Thi Lan",   "Ke toan",           "1993-05-30","2019-09-15",22,18000000,700000.0,18700000],
+            ["Hoang Van Khanh","Thiet ke UI/UX",    "1997-02-14","2021-04-05",25,14000000,450000.0,14450000]
+          ],
+          cellWidth: 20, cellHeight: 20
+        }]
+      }]
+    },
+    multi: {
+      isMultipleSheet: true,
+      data: [
+        {
+          title: "Danh sach nhan vien",
+          contents: [{
+            subTitle: "Bao cao nhan su thang 10/2026",
+            headerCells: ["Ho va ten","Chuc vu","So ngay cong","Luong co ban","Tong thu nhap"],
+            tableRows: [
+              ["Nguyen Van An",  "Lap trinh vien",   26,15000000,15500000],
+              ["Tran Thi Bich",  "Kiem thu",         24,12000000,12300000],
+              ["Le Minh Duc",    "Quan ly du an",    26,25000000,26000000],
+              ["Vu Quoc Hung",   "DevOps",           26,22000000,22800000],
+              ["Dao Minh Tri",   "Giam doc CN",      26,50000000,53000000]
+            ],
+            cellWidth: 20, cellHeight: 20
+          }]
+        },
+        {
+          title: "Danh sach du an",
+          contents: [{
+            subTitle: "Bao cao tien do du an quy 4/2026",
+            headerCells: ["Ten du an","Khach hang","So TV","Ngan sach","Tien do (%)","Trang thai"],
+            tableRows: [
+              ["He thong quan ly nhan su","Cong ty ABC",  8, 500000000,  95.5,"Hoan thanh"],
+              ["Ung dung ban hang mobile","Cong ty XYZ",  12,800000000,  72.0,"Dang thuc hien"],
+              ["Portal khach hang B2B",   "Tap doan DEF", 15,1200000000, 45.0,"Dang thuc hien"],
+              ["He thong bao cao TC",     "Ngan hang GHI",6, 350000000, 100.0,"Hoan thanh"],
+              ["Cong cu quan ly kho",     "Nha may YZ",   6, 300000000,  78.0,"Gan hoan thanh"]
+            ],
+            cellWidth: 25, cellHeight: 20
+          }]
+        }
+      ]
+    },
+    multiContent: {
+      // 1 sheet, nhieu bang noi dung (nhieu contents trong cung 1 sheet)
+      isMultipleSheet: false,
+      data: [{
+        title: "Bao cao tong hop thang 10/2026",
+        contents: [
+          {
+            // Noi dung 1: Danh sach nhan vien
+            subTitle: "I. Danh sach nhan vien",
+            headerCells: ["Ho va ten","Chuc vu","So ngay cong","Luong co ban","Phu cap","Tong thu nhap"],
+            tableRows: [
+              ["Nguyen Van An",  "Lap trinh vien",  26,15000000,500000.0, 15500000],
+              ["Tran Thi Bich",  "Kiem thu",        24,12000000,300000.0, 12300000],
+              ["Le Minh Duc",    "Quan ly du an",   26,25000000,1000000.0,26000000],
+              ["Pham Thi Lan",   "Ke toan",         22,18000000,700000.0, 18700000],
+              ["Hoang Van Khanh","Thiet ke UI/UX",  25,14000000,450000.0, 14450000]
+            ],
+            cellWidth: 20, cellHeight: 20
+          },
+          {
+            // Noi dung 2: Danh sach du an
+            subTitle: "II. Danh sach du an dang thuc hien",
+            headerCells: ["Ten du an","Khach hang","So thanh vien","Ngan sach (VND)","Tien do (%)","Trang thai"],
+            tableRows: [
+              ["He thong quan ly nhan su","Cong ty ABC",   8, 500000000,  95.5,"Hoan thanh"],
+              ["Ung dung ban hang mobile","Cong ty XYZ",  12, 800000000,  72.0,"Dang thuc hien"],
+              ["Portal khach hang B2B",   "Tap doan DEF", 15,1200000000,  45.0,"Dang thuc hien"],
+              ["Dashboard phan tich data","Cong ty MNO",   5, 200000000,  88.0,"Gan hoan thanh"],
+              ["Cong cu quan ly kho",     "Nha may YZ",    6, 300000000,  78.0,"Gan hoan thanh"]
+            ],
+            cellWidth: 25, cellHeight: 20
+          },
+          {
+            // Noi dung 3: Tong ket chi phi
+            subTitle: "III. Tong ket chi phi",
+            headerCells: ["Khoan muc","So tien (VND)","Ghi chu"],
+            tableRows: [
+              ["Tong luong nhan vien", 86950000, "5 nhan vien"],
+              ["Chi phi van phong",    12000000, "Thue + dien nuoc"],
+              ["Chi phi marketing",     8500000, "Quang cao online"],
+              ["Du phong",              5000000, "10% tong chi phi"],
+              ["TONG CONG",           112450000, ""]
+            ],
+            cellWidth: 22, cellHeight: 20
+          }
+        ]
+      }]
+    },
+    custom: {
+      isMultipleSheet: false,
+      data: [{
+        title: "Sheet Title",
+        contents: [{
+          subTitle: "Sub title",
+          headerCells: ["Column 1","Column 2","Column 3"],
+          tableRows: [
+            ["Value A1","Value B1",100],
+            ["Value A2","Value B2",200]
+          ],
+          cellWidth: 20, cellHeight: 20
+        }]
+      }]
+    }
+  };
+
+  let currentTab = 'single';
+
+  function switchTab(tab) {
+    currentTab = tab;
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
+    loadPreset(tab);
+    hideError();
+  }
+
+  function loadPreset(tab) {
+    const preset = PRESETS[tab];
+    const fileName = document.getElementById('fileName').value.trim() || 'bao_cao';
+    const body = { fileName, ...preset };
+    document.getElementById('payload').value = JSON.stringify(body, null, 2);
+  }
+
+  function formatJson() {
+    try {
+      const val = document.getElementById('payload').value;
+      document.getElementById('payload').value = JSON.stringify(JSON.parse(val), null, 2);
+      hideError();
+    } catch (e) {
+      showError('JSON không hợp lệ: ' + e.message);
+    }
+  }
+
+  function setStatus(state, msg) {
+    const dot  = document.getElementById('status-dot');
+    const text = document.getElementById('status-text');
+    dot.className = 'status-dot ' + (state || '');
+    text.textContent = msg;
+  }
+
+  function showError(msg) {
+    const box = document.getElementById('error-box');
+    box.textContent = msg;
+    box.style.display = 'block';
+  }
+
+  function hideError() {
+    document.getElementById('error-box').style.display = 'none';
+  }
+
+  function showToast(icon, msg, ms = 3000) {
+    const t = document.getElementById('toast');
+    document.getElementById('toast-icon').textContent = icon;
+    document.getElementById('toast-msg').textContent  = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), ms);
+  }
+
+  async function downloadExcel() {
+    hideError();
+    const btn     = document.getElementById('downloadBtn');
+    const spinner = document.getElementById('spinner');
+    const dlIcon  = document.getElementById('dl-icon');
+    const baseUrl = document.getElementById('baseUrl').value.trim().replace(/\/$/, '');
+    const rawJson = document.getElementById('payload').value;
+
+    // Validate JSON
+    let body;
+    try {
+      body = JSON.parse(rawJson);
+    } catch (e) {
+      showError('❌ JSON không hợp lệ:\n' + e.message);
+      setStatus('error', 'JSON lỗi');
+      return;
+    }
+
+    // Sync fileName from input
+    body.fileName = document.getElementById('fileName').value.trim() || body.fileName || 'export';
+
+    btn.disabled = true;
+    spinner.style.display = 'block';
+    dlIcon.style.display  = 'none';
+    setStatus('loading', 'Đang gửi request...');
+
+    try {
+      const res = await fetch(`${baseUrl}/export/excel`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+
+      if (!res.ok) {
+        const errText = await res.text().catch(() => `HTTP ${res.status}`);
+        throw new Error(`HTTP ${res.status}: ${errText}`);
+      }
+
+      setStatus('loading', 'Đang tải file...');
+
+      // Extract filename from Content-Disposition header
+      const disposition = res.headers.get('Content-Disposition') || '';
+      let fileName = body.fileName + '.xlsx';
+      const match  = disposition.match(/filename\*?=(?:UTF-8'')?["']?([^;"'\n]+)/i);
+      if (match) fileName = decodeURIComponent(match[1].replace(/['"]/g, ''));
+
+      const blob = await res.blob();
+      const url  = URL.createObjectURL(blob);
+      const a    = document.createElement('a');
+      a.href     = url;
+      a.download = fileName;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      setStatus('success', `✓ Đã tải: ${fileName}`);
+      showToast('✅', `Tải thành công: ${fileName}`);
+    } catch (err) {
+      showError(err.message);
+      setStatus('error', 'Thất bại');
+      showToast('❌', err.message.length > 60 ? err.message.slice(0, 60) + '…' : err.message, 4000);
+    } finally {
+      btn.disabled = false;
+      spinner.style.display = 'none';
+      dlIcon.style.display  = 'block';
+    }
+  }
+
+  // Init
+  loadPreset('single');
+</script>
+</body>
+</html>
